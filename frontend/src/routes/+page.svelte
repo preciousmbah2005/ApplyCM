@@ -49,7 +49,7 @@
 <svelte:window onscroll={handleScroll} />
 
 <div class="app-shell">
-	<header class="site-header" class:scrolled>
+	<header class="site-header" >
 		<a href="/" class="logo">Apply<span>CM</span></a>
 
 		<form class="search-form" onsubmit={handleSearch}>
@@ -189,10 +189,6 @@
 		background: var(--color-paper);
 		border-bottom: 1px solid var(--color-line);
 		transition: box-shadow 0.3s ease;
-	}
-
-	.site-header.scrolled {
-		box-shadow: 0 8px 20px -14px rgba(32, 26, 20, 0.35);
 	}
 
 	.logo {

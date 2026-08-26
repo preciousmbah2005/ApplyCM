@@ -2,9 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, students, schools, applications, favorites
 from app.db.database import engine
-from app.db.base_class import Base
-# Import all models to ensure they are registered on Base.metadata before creating tables
-from app.models.user import User
+from app.db.base import Base
 
 Base.metadata.create_all(bind=engine)
 
