@@ -33,21 +33,9 @@
       complete: false,
     },
     {
-      key: "family",
-      label: "Family",
-      href: "/application/family",
-      complete: false,
-    },
-    {
       key: "education",
       label: "Education",
       href: "/application/education",
-      complete: false,
-    },
-    {
-      key: "testing",
-      label: "Testing",
-      href: "/application/testing",
       complete: false,
     },
     {
@@ -104,12 +92,25 @@
     }
   }
 
+  function getCompletedSections(sections: ApplicationSectionStatus[]): ApplicationSectionStatus[] {
+    if (typeof window === "undefined") return sections;
+    return sections.map((sec) => {
+      const isCompleteStored = localStorage.getItem(`section_${sec.key}_complete`);
+      return {
+        ...sec,
+        complete: isCompleteStored === "true" || sec.complete
+      };
+    });
+  }
+
   onMount(loadDashboard);
 
   const visibleSections = $derived(
-    summary.applicationSections.length
-      ? summary.applicationSections
-      : DEFAULT_SECTIONS,
+    getCompletedSections(
+      summary.applicationSections.length
+        ? summary.applicationSections
+        : DEFAULT_SECTIONS,
+    )
   );
   const totalSections = $derived(visibleSections.length);
   const completedSections = $derived(

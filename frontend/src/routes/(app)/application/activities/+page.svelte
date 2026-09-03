@@ -1,7 +1,8 @@
 <script lang="ts">
-  let essayPrompt = $state("Personal Statement");
-  let personalStatement = $state("");
-  let additionalInfo = $state("");
+  let activityName = $state("");
+  let rolePosition = $state("");
+  let description = $state("");
+  let honorsAwards = $state("");
   let isSaving = $state(false);
   let saveSuccess = $state(false);
 
@@ -14,24 +15,25 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          essayPrompt,
-          personalStatement,
-          additionalInfo,
+          activityName,
+          rolePosition,
+          description,
+          honorsAwards,
           is_completed: true
         }),
       });
 
-      localStorage.setItem("section_writing_complete", "true");
+      localStorage.setItem("section_activities_complete", "true");
       saveSuccess = true;
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        window.location.href = "/application/writing";
       }, 1200);
     } catch (err) {
-      console.error("Save writing details failed, setting local state:", err);
-      localStorage.setItem("section_writing_complete", "true");
+      console.error("Save activities details failed, setting local state:", err);
+      localStorage.setItem("section_activities_complete", "true");
       saveSuccess = true;
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        window.location.href = "/application/writing";
       }, 1200);
     } finally {
       isSaving = false;
@@ -40,51 +42,66 @@
 </script>
 
 <div class="step-page">
-  <h3 class="step-title">Writing & Personal Statement</h3>
+  <h3 class="step-title">Activities & Experiences</h3>
 
   {#if saveSuccess}
     <div class="alert-success" role="status">
-      ✓ Writing section saved! Application sections complete. Redirecting to Dashboard...
+      ✓ Activities saved! Redirecting to Writing & Statement...
     </div>
   {/if}
 
   <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-    <div class="form-group">
-      <label for="essayPrompt">Select Essay Topic</label>
-      <span class="field-desc">Choose the primary prompt or topic for your personal statement essay.</span>
-      <select id="essayPrompt" required bind:value={essayPrompt}>
-        <option value="Personal Statement">Personal Statement / Career Goals</option>
-        <option value="Challenge Overcome">Share a time you faced a significant challenge and how you overcame it</option>
-        <option value="Community Impact">How do you plan to impact your community through your studies?</option>
-        <option value="Open Prompt">Topic of your choice</option>
-      </select>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="activityName">Activity / Organization Name</label>
+        <span class="field-desc">Name of club, organization, volunteer group, or sports team.</span>
+        <input
+          id="activityName"
+          type="text"
+          placeholder="Activity / Organization Name"
+          required
+          bind:value={activityName}
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="rolePosition">Role / Leadership Position</label>
+        <span class="field-desc">Your official position or role within the activity.</span>
+        <input
+          id="rolePosition"
+          type="text"
+          placeholder="Role / Leadership Position"
+          required
+          bind:value={rolePosition}
+        />
+      </div>
     </div>
 
     <div class="form-group">
-      <label for="personalStatement">Personal Statement Essay</label>
-      <span class="field-desc">Compose your personal essay (recommended length: 250 - 650 words).</span>
+      <label for="description">Activity Description & Impact</label>
+      <span class="field-desc">Describe your responsibilities, key achievements, and time dedicated.</span>
       <textarea
-        id="personalStatement"
-        rows="8"
-        placeholder="Write your essay here..."
+        id="description"
+        rows="4"
+        placeholder="Activity Description & Impact"
         required
-        bind:value={personalStatement}
+        bind:value={description}
       ></textarea>
     </div>
 
     <div class="form-group">
-      <label for="additionalInfo">Additional Information / Special Circumstances (Optional)</label>
-      <span class="field-desc">Provide any additional context regarding your education journey or special circumstances.</span>
-      <textarea
-        id="additionalInfo"
-        rows="3"
-        placeholder="Additional information or details for admissions..."
-        bind:value={additionalInfo}
-      ></textarea>
+      <label for="honorsAwards">Honors & Awards (Optional)</label>
+      <span class="field-desc">Any awards, recognitions, or prizes received for this activity.</span>
+      <input
+        id="honorsAwards"
+        type="text"
+        placeholder="Honors & Awards"
+        bind:value={honorsAwards}
+      />
     </div>
 
     <button type="submit" class="btn-save" disabled={isSaving}>
-      {isSaving ? "Saving..." : "Save & Finish Profile"}
+      {isSaving ? "Saving..." : "Save & Continue"}
     </button>
   </form>
 </div>
@@ -117,6 +134,18 @@
     gap: 1.25rem;
   }
 
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 580px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .form-group {
     display: flex;
     flex-direction: column;
@@ -136,7 +165,7 @@
     line-height: 1.35;
   }
 
-  .step-page form select,
+  .step-page form input,
   .step-page form textarea {
     padding: 0.75rem 1rem;
     border: 1px solid #cbd5e0;
@@ -149,6 +178,7 @@
   }
 
   /* Placeholder styling */
+  .step-page form input::placeholder,
   .step-page form textarea::placeholder {
     color: #94a3b8;
     font-style: italic;
@@ -156,7 +186,7 @@
   }
 
   /* Explicit Blue focus border */
-  .step-page form select:focus,
+  .step-page form input:focus,
   .step-page form textarea:focus {
     border-color: #2563eb !important;
     outline: none !important;

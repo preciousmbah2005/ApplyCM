@@ -1,5 +1,7 @@
 <script lang="ts">
+// Declaring a constant array
 	const steps = [
+		// Declaring objects in the array of size 4 and index 3
 		{
 			number: "01",
 			title: "Build your profile",
@@ -27,12 +29,13 @@
 
 	function handleSearch(event: Event) {
 		event.preventDefault();
-		if (searchQuery.trim() === "") return;
+		if (searchQuery.trim() === "") 
+		return;
 		console.log("Searching for:", searchQuery);
 	}
 
 	function handleScroll() {
-		scrolled = window.scrollY > 8;
+		scrolled = window.scrollY > 18;
 	}
 </script>
 

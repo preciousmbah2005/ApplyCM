@@ -1,12 +1,11 @@
 <script lang="ts">
-  let firstName = $state("");
-  let lastName = $state("");
-  let email = $state("");
-  let phone = $state("");
-  let declaredState = $state("");
+  let address = $state("");
+  let city = $state("");
+  let region = $state("");
+  let emergencyName = $state("");
+  let emergencyPhone = $state("");
   let isSaving = $state(false);
   let saveSuccess = $state(false);
-  let saveError = $state<string | null>(null);
 
   const CAMEROON_REGIONS = [
     "Adamawa",
@@ -24,42 +23,32 @@
   async function handleSubmit() {
     isSaving = true;
     saveSuccess = false;
-    saveError = null;
 
     try {
-      const res = await fetch("http://localhost:8001/api/v1/student-profile", {
+      await fetch("http://localhost:8001/api/v1/student-profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName,
-          lastName,
-          phone,
-          email,
-          declaredState,
+          address,
+          city,
+          region,
+          emergencyName,
+          emergencyPhone,
           is_completed: true
         }),
       });
 
-      if (!res.ok) {
-        throw new Error(`Server returned status ${res.status}`);
-      }
-
-      const data = await res.json().catch(() => ({}));
-      console.log("Saved profile successfully:", data);
-
-      localStorage.setItem("section_profile_complete", "true");
+      localStorage.setItem("section_contact_complete", "true");
       saveSuccess = true;
       setTimeout(() => {
-        window.location.href = "/application/contact";
+        window.location.href = "/application/education";
       }, 1200);
-    } catch (err: any) {
-      console.error("Save profile failed, updating local state:", err);
-      localStorage.setItem("section_profile_complete", "true");
+    } catch (err) {
+      console.error("Save contact details failed, setting local state:", err);
+      localStorage.setItem("section_contact_complete", "true");
       saveSuccess = true;
       setTimeout(() => {
-        window.location.href = "/application/contact";
+        window.location.href = "/application/education";
       }, 1200);
     } finally {
       isSaving = false;
@@ -68,84 +57,78 @@
 </script>
 
 <div class="step-page">
-  <h3 class="step-title">Personal Details</h3>
+  <h3 class="step-title">Contact & Address Information</h3>
 
   {#if saveSuccess}
     <div class="alert-success" role="status">
-      ✓ Personal details saved! Section completed. Redirecting to Contact Details...
+      ✓ Contact information saved! Redirecting to Education History...
     </div>
   {/if}
 
-  {#if saveError}
-    <div class="alert-error" role="alert">
-      {saveError}
+  <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+    <div class="form-group">
+      <label for="address">Permanent Street Address</label>
+      <span class="field-desc">Provide your residential street address or quarter location.</span>
+      <input
+        id="address"
+        type="text"
+        placeholder="Permanent Street Address"
+        required
+        bind:value={address}
+      />
     </div>
-  {/if}
 
-  <form onsubmit={(event) => { event.preventDefault(); handleSubmit(); }}>
     <div class="form-grid">
       <div class="form-group">
-        <label for="firstName">First Name</label>
-        <span class="field-desc">Enter your official given name as shown on legal identity documents.</span>
+        <label for="city">City / Town</label>
+        <span class="field-desc">City or municipality where you currently reside.</span>
         <input
-          id="firstName"
+          id="city"
           type="text"
-          placeholder="First Name"
+          placeholder="City / Town"
           required
-          bind:value={firstName}
+          bind:value={city}
         />
       </div>
 
       <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <span class="field-desc">Enter your official family name or surname.</span>
-        <input
-          id="lastName"
-          type="text"
-          placeholder="Last Name"
-          required
-          bind:value={lastName}
-        />
+        <label for="region">Region / Province</label>
+        <span class="field-desc">Administrative region of your address.</span>
+        <select id="region" required bind:value={region}>
+          <option value="" disabled selected>Select Region</option>
+          {#each CAMEROON_REGIONS as reg}
+            <option value={reg}>{reg}</option>
+          {/each}
+        </select>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="email">Email Address</label>
-      <span class="field-desc">Primary email address for application updates and university correspondence.</span>
-      <input
-        id="email"
-        type="email"
-        placeholder="Email Address"
-        required
-        bind:value={email}
-      />
-    </div>
+    <h4 class="section-subtitle">Emergency Contact</h4>
 
-    <div class="form-group">
-      <label for="phone">Phone Number</label>
-      <span class="field-desc">Mobile telephone number including country code (+237).</span>
-      <input
-        id="phone"
-        type="tel"
-        placeholder="Phone Number"
-        required
-        bind:value={phone}
-      />
-    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="emergencyName">Emergency Contact Name</label>
+        <span class="field-desc">Full name of a parent, guardian, or trusted emergency contact.</span>
+        <input
+          id="emergencyName"
+          type="text"
+          placeholder="Emergency Contact Name"
+          required
+          bind:value={emergencyName}
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="declaredState">Declared State / Region</label>
-      <span class="field-desc">Select your official region of origin or state of residence.</span>
-      <select
-        id="declaredState"
-        required
-        bind:value={declaredState}
-      >
-        <option value="" disabled selected>Select Declared State / Region</option>
-        {#each CAMEROON_REGIONS as region}
-          <option value={region}>{region}</option>
-        {/each}
-      </select>
+      <div class="form-group">
+        <label for="emergencyPhone">Emergency Contact Phone</label>
+        <span class="field-desc">Telephone number for your emergency contact.</span>
+        <input
+          id="emergencyPhone"
+          type="tel"
+          placeholder="Emergency Contact Phone"
+          required
+          bind:value={emergencyPhone}
+        />
+      </div>
     </div>
 
     <button type="submit" class="btn-save" disabled={isSaving}>
@@ -165,21 +148,19 @@
     font-weight: 700;
     color: #1a2b4a;
   }
+  .section-subtitle {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 0.5rem;
+  }
 
   .alert-success {
     background-color: #e6fffa;
     border: 1px solid #319795;
     color: #234e52;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-  }
-
-  .alert-error {
-    background-color: #fff5f5;
-    border: 1px solid #feb2b2;
-    color: #9b2c2c;
     padding: 0.75rem 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -234,7 +215,7 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  /* Input placeholder styling */
+  /* Placeholder styling */
   .step-page form input::placeholder {
     color: #94a3b8;
     font-style: italic;
@@ -246,7 +227,7 @@
     font-style: italic;
   }
 
-  /* Input focus styling: Explicit Blue border instead of black */
+  /* Explicit Blue focus border */
   .step-page form input:focus,
   .step-page form select:focus {
     border-color: #2563eb !important;
@@ -272,7 +253,6 @@
   .btn-save:hover:not(:disabled) {
     background-color: #1d4ed8;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
   }
 
   .btn-save:disabled {

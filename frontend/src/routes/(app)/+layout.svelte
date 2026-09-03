@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from "$app/state";
+
 	let { children } = $props();
 
 	let mobileMenuOpen = $state(false);
@@ -8,6 +10,21 @@
 	}
 	function closeMobileMenu() {
 		mobileMenuOpen = false;
+	}
+
+	const navItems = [
+		{ href: "/dashboard", label: "Dashboard" },
+		{ href: "/discover", label: "Discover Schools" },
+		{ href: "/application/profile", label: "Application Profile", matchPrefix: "/application" },
+		{ href: "/favorites", label: "Favorites" },
+		{ href: "/settings", label: "Settings" }
+	];
+
+	function isActive(item: { href: string; matchPrefix?: string }): boolean {
+		if (item.matchPrefix) {
+			return page.url.pathname.startsWith(item.matchPrefix);
+		}
+		return page.url.pathname === item.href;
 	}
 </script>
 
@@ -23,7 +40,7 @@
 
 		<a class="logo" href="/dashboard">
 			<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-				<path d="M4 20 L12 4 L20 20 Z" fill="none" stroke="#1a56db" stroke-width="2" />
+				<path d="M4 20 L12 4 L20 20 Z" fill="none" stroke="#2563eb" stroke-width="2" />
 			</svg>
 			<span>ApplyCM</span>
 		</a>
@@ -45,17 +62,24 @@
 	<nav class="sidebar" class:open={mobileMenuOpen}>
 		<a class="logo desktop-logo" href="/dashboard">
 			<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-				<path d="M4 20 L12 4 L20 20 Z" fill="none" stroke="#1a56db" stroke-width="2" />
+				<path d="M4 20 L12 4 L20 20 Z" fill="none" stroke="#2563eb" stroke-width="2.5" />
 			</svg>
 			<span>ApplyCM</span>
 		</a>
 
 		<ul>
-			<li><a href="/dashboard" onclick={closeMobileMenu}>Dashboard</a></li>
-			<li><a href="/discover" onclick={closeMobileMenu}>Discover Schools</a></li>
-			<li><a href="/application/profile" onclick={closeMobileMenu}>Application Profile</a></li>
-			<li><a href="/favorites" onclick={closeMobileMenu}>Favorites</a></li>
-			<li><a href="/settings" onclick={closeMobileMenu}>Settings</a></li>
+			{#each navItems as item}
+				{@const active = isActive(item)}
+				<li>
+					<a
+						href={item.href}
+						class:active
+						onclick={closeMobileMenu}
+					>
+						{item.label}
+					</a>
+				</li>
+			{/each}
 		</ul>
 	</nav>
 
@@ -102,18 +126,30 @@
 		margin: 0;
 	}
 	.sidebar ul li {
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
 	}
 	.sidebar ul li a {
 		color: #a0aec0;
 		text-decoration: none;
 		display: block;
-		padding: 0.5rem;
-		border-radius: 4px;
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		font-size: 0.95rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		border-left: 4px solid transparent;
 	}
 	.sidebar ul li a:hover {
 		background-color: #2d3748;
 		color: white;
+	}
+	/* Active Tab Highlight: Blue background, accent blue border, bold text */
+	.sidebar ul li a.active {
+		background-color: #2563eb;
+		color: #ffffff;
+		font-weight: 600;
+		border-left: 4px solid #93c5fd;
+		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 	}
 
 	.backdrop {
