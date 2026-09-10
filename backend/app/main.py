@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
 from app.routers import auth, students, schools, applications, favorites
-from app.db.database import engine
-from app.db.base import Base
 
-Base.metadata.create_all(bind=engine)
+# Schema is owned exclusively by Alembic; never create tables at import time.
 
 app = FastAPI(
     title="ApplyCM API",
@@ -15,12 +14,7 @@ app = FastAPI(
 # CORS middleware configuration for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-    ],
+    allow_origins=list(settings.CORS_ORIGINS),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
