@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_BASE_URL } from "$lib/config";
   let currentPassword = $state("");
   let newPassword = $state("");
   let confirmPassword = $state("");
@@ -21,14 +22,12 @@
       passwordError = "Please enter your current password.";
       return;
     }
-    if (!newPassword) {
-      passwordError = "Please enter a new password.";
-      return;
-    }
-    if (newPassword.length < 6) {
+
+    if (!newPassword || newPassword.length < 6) {
       passwordError = "New password must be at least 6 characters long.";
       return;
     }
+
     if (newPassword !== confirmPassword) {
       passwordError = "New passwords do not match.";
       return;
@@ -38,7 +37,7 @@
 
     try {
       const token = localStorage.getItem("access_token") || "";
-      const res = await fetch("http://localhost:8001/api/auth/change-password", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +101,7 @@
     isDeleting = true;
     try {
       const token = localStorage.getItem("access_token") || "";
-      await fetch("http://localhost:8001/api/users/me", {
+      await fetch(`${API_BASE_URL}/api/users/me`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

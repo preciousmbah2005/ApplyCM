@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_BASE_URL } from "$lib/config";
   let secondarySchool = $state("");
   let advancedLevelSlipImage = $state("");
   let ordinaryLevelSlipImage = $state("");
@@ -10,7 +11,7 @@
     saveSuccess = false;
 
     try {
-      const res = await fetch("http://localhost:8001/api/v1/student-profile", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/student-profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

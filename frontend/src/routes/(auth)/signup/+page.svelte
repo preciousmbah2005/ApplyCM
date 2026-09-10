@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { API_BASE_URL } from "$lib/config";
     //support@fapshi.com
     let email = $state("");
     let password = $state("");
@@ -18,7 +19,7 @@
         isLoading = true;
         try {
             const response = await fetch(
-                "http://127.0.0.1:8000/api/auth/signup",
+                `${API_BASE_URL}/api/auth/signup`,
                 {
                     method: "POST",
                     headers: {

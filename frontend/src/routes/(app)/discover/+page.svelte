@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { API_BASE_URL } from "$lib/config";
 
   interface School {
     id: string;
@@ -198,7 +199,7 @@
     loading = true;
     loadError = null;
     try {
-      const res = await fetch("http://localhost:8001/api/schools");
+      const res = await fetch(`${API_BASE_URL}/api/schools`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -260,7 +261,7 @@
       localStorage.setItem("favorite_schools_list", JSON.stringify(favObjects));
     }
 
-    fetch("http://localhost:8001/api/favorites", {
+    fetch(`${API_BASE_URL}/api/favorites`, {
       method: favoriteIds.includes(schoolId) ? "POST" : "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ school_id: schoolId }),

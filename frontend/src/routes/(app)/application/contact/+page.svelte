@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_BASE_URL } from "$lib/config";
   let address = $state("");
   let city = $state("");
   let region = $state("");
@@ -25,7 +26,7 @@
     saveSuccess = false;
 
     try {
-      await fetch("http://localhost:8001/api/v1/student-profile", {
+      await fetch(`${API_BASE_URL}/api/v1/student-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

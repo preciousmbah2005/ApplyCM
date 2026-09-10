@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_BASE_URL } from "$lib/config";
   let firstName = $state("");
   let lastName = $state("");
   let email = $state("");
@@ -27,7 +28,7 @@
     saveError = null;
 
     try {
-      const res = await fetch("http://localhost:8001/api/v1/student-profile", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/student-profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
