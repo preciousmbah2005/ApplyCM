@@ -138,17 +138,125 @@ def upgrade() -> None:
     op.create_index(op.f('ix_documents_id'), 'documents', ['id'], unique=False)
     op.create_index('idx_documents_student_id', 'documents', ['student_id'], unique=False)
 
-    # NOTE: Row Level Security was intentionally removed.
-    #
-    # The original policies depended on Supabase primitives that do not exist on
-    # pure PostgreSQL: the `auth.uid()` function and the `authenticated` role.
-    # ApplyCM runs on Neon with no BaaS layer, so authorization is enforced in
-    # the application tier by `app.dependencies.get_current_user` and the
-    # service layer, which scope every query to the authenticated student.
-    #
-    # These policies would also have been inert in practice: the backend
-    # connects as the table owner, and owners bypass RLS unless the table is
-    # explicitly marked FORCE ROW LEVEL SECURITY.
+    # 10. Enable Row Level Security
+    op.execute("ALTER TABLE users ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE student_profiles ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE schools ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE programs ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE applications ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;")
+    op.execute("ALTER TABLE documents ENABLE ROW LEVEL SECURITY;")
+
+    # 11. Create current_student_id() helper function
+    op.execute("""
+        CREATE OR REPLACE FUNCTION current_student_id()
+        RETURNS uuid
+        LANGUAGE sql
+        STABLE
+        SECURITY DEFINER
+        SET search_path = public
+        AS $$
+          SELECT id FROM student_profiles WHERE user_id = auth.uid()
+        $$;
+    """)
+
+    # 12. Create RLS Policies
+    # Users policies
+    op.execute("""
+        CREATE POLICY "Users can view own row"
+          ON users FOR SELECT
+          USING (auth.uid() = id);
+    """)
+    op.execute("""
+        CREATE POLICY "Users can update own row"
+          ON users FOR UPDATE
+          USING (auth.uid() = id)
+          WITH CHECK (auth.uid() = id);
+    """)
+
+    # Student profiles policies
+    op.execute("""
+        CREATE POLICY "Students can view own profile"
+          ON student_profiles FOR SELECT
+          USING (auth.uid() = user_id);
+    """)
+    op.execute("""
+        CREATE POLICY "Students can create own profile"
+          ON student_profiles FOR INSERT
+          WITH CHECK (auth.uid() = user_id);
+    """)
+    op.execute("""
+        CREATE POLICY "Students can update own profile"
+          ON student_profiles FOR UPDATE
+          USING (auth.uid() = user_id)
+          WITH CHECK (auth.uid() = user_id);
+    """)
+
+    # Schools & Programs policies
+    op.execute("""
+        CREATE POLICY "Any authenticated user can view schools"
+          ON schools FOR SELECT
+          TO authenticated
+          USING (true);
+    """)
+    op.execute("""
+        CREATE POLICY "Any authenticated user can view programs"
+          ON programs FOR SELECT
+          TO authenticated
+          USING (true);
+    """)
+
+    # Applications policies
+    op.execute("""
+        CREATE POLICY "Students can view own applications"
+          ON applications FOR SELECT
+          USING (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can create own applications"
+          ON applications FOR INSERT
+          WITH CHECK (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can update own applications"
+          ON applications FOR UPDATE
+          USING (student_id = current_student_id())
+          WITH CHECK (student_id = current_student_id());
+    """)
+
+    # Favorites policies
+    op.execute("""
+        CREATE POLICY "Students can view own favorites"
+          ON favorites FOR SELECT
+          USING (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can add own favorites"
+          ON favorites FOR INSERT
+          WITH CHECK (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can remove own favorites"
+          ON favorites FOR DELETE
+          USING (student_id = current_student_id());
+    """)
+
+    # Documents policies
+    op.execute("""
+        CREATE POLICY "Students can view own documents"
+          ON documents FOR SELECT
+          USING (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can upload own documents"
+          ON documents FOR INSERT
+          WITH CHECK (student_id = current_student_id());
+    """)
+    op.execute("""
+        CREATE POLICY "Students can delete own documents"
+          ON documents FOR DELETE
+          USING (student_id = current_student_id());
+    """)
 
 
 def downgrade() -> None:
