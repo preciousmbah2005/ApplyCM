@@ -249,3 +249,7 @@ cython_debug/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Agents & Skills
+.agents/
+skills-lock.json
